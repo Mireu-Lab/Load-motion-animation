@@ -1,0 +1,22 @@
+# Binaries & build output
+bin/
+*.exe
+*.exe;
+*.dll
+*.so
+*.dylib
+
+# Temporary test/export outputs
+*.gif
+*.csv
+*.tsv
+*.sql
+*.json
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+.pytest_cache/
