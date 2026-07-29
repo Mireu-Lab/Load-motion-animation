@@ -1,0 +1,53 @@
+name: Issue Auto Branch Creator
+
+on:
+  issues:
+    types: [opened, labeled]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  create-issue-branch:
+    name: Create Branch from Issue
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate Branch Name & Create Branch
+        id: branch
+        run: |
+          ISSUE_NUM="${{ github.event.issue.number }}"
+          ISSUE_TITLE="${{ github.event.issue.title }}"
+          
+          CLEAN_TITLE=$(echo "$ISSUE_TITLE" | tr '[:upper:]' '[:lower:]' | sed -e 's/[^a-z0-9]/-/g' -e 's/-\+/ -/g' -e 's/^-//' -e 's/-$//' | cut -c 1-40)
+          
+          BRANCH_NAME="issue-${ISSUE_NUM}-${CLEAN_TITLE}"
+          echo "branch_name=${BRANCH_NAME}" >> $GITHUB_OUTPUT
+          
+          echo "Creating branch ${BRANCH_NAME}..."
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          git checkout -b "${BRANCH_NAME}"
+          git push origin "${BRANCH_NAME}"
+
+      - name: Comment on Issue
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const branchName = '${{ steps.branch.outputs.branch_name }}';
+            const issueNumber = context.issue.number;
+            const message = `🚀 **자동 브랜치 생성 완료**\n\n이 이슈를 기반으로 작업 브랜치가 생성되었습니다:\n- **Branch Name**: \`${branchName}\`\n\n\`\`\`bash\ngit fetch origin\ngit checkout ${branchName}\n\`\`\``;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: message
+            });
