@@ -1,9 +1,16 @@
+// Package c3d provides a binary parser for C3D (Coordinate 3D) motion capture files.
+//
+// C3D is a standardized binary file format commonly used in biomechanics, gait analysis,
+// and optical motion capture systems (such as Vicon, Qualisys, and Motion Analysis).
+// This package parses 3D point markers, frame rates, point labels, and trajectories
+// into unified [motion.MotionData].
 package c3d
 
 import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"io"
 	"math"
 	"os"
 	"strings"
@@ -11,33 +18,77 @@ import (
 	"load-motion-animation/pkg/motion"
 )
 
-// Parser parses binary C3D motion capture files
+// Parser parses binary C3D motion capture files.
 type Parser struct{}
 
+var _ motion.StreamParser = (*Parser)(nil)
+
+// NewParser creates a new C3D [Parser] instance.
 func NewParser() *Parser {
 	return &Parser{}
 }
 
-// C3DHeader represents the parsed header of a C3D binary file
+// C3DHeader represents the parsed header block (512 bytes) of a C3D binary file.
 type C3DHeader struct {
+	// ParamStartBlock is the 1-based block number where the parameter section starts.
 	ParamStartBlock uint8
-	Magic           uint8
-	NumPoints       uint16
-	NumAnalog       uint16
-	StartFrame      uint16
-	EndFrame        uint16
-	MaxGap          uint16
-	ScaleFactor     float32
-	DataStartBlock  uint16
-	AnalogRate      uint16
-	FrameRate       float32
+	// Magic is the signature byte (80 for standard C3D).
+	Magic uint8
+	// NumPoints is the number of 3D marker points per frame.
+	NumPoints uint16
+	// NumAnalog is the total number of analog measurements per 3D frame.
+	NumAnalog uint16
+	// StartFrame is the index of the first frame.
+	StartFrame uint16
+	// EndFrame is the index of the last frame.
+	EndFrame uint16
+	// MaxGap is the maximum interpolation gap length.
+	MaxGap uint16
+	// ScaleFactor converts integer coordinates to real units (negative indicates float storage).
+	ScaleFactor float32
+	// DataStartBlock is the 1-based block number where 3D/analog data begins.
+	DataStartBlock uint16
+	// AnalogRate is the number of analog samples per 3D frame.
+	AnalogRate uint16
+	// FrameRate is the 3D sampling rate in frames per second (Hz).
+	FrameRate float32
 }
 
+// ParseFile reads and parses a C3D file from the filesystem into a complete [motion.MotionData] structure.
 func (p *Parser) ParseFile(filePath string) (*motion.MotionData, error) {
+	return p.StreamFile(filePath, nil)
+}
+
+// StreamFile opens the given C3D file and streams each decoded frame to callback without accumulating frames in memory.
+func (p *Parser) StreamFile(filePath string, callback motion.FrameCallback) (*motion.MotionData, error) {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read C3D file: %w", err)
 	}
+	return p.StreamBytes(data, filePath, callback)
+}
+
+// ParseReader reads all binary content from an [io.Reader] and decodes it.
+func (p *Parser) ParseReader(r io.Reader, filename string) (*motion.MotionData, error) {
+	return p.StreamReader(r, filename, nil)
+}
+
+// StreamReader decodes C3D frames from an [io.Reader] stream and calls callback for each frame if provided.
+func (p *Parser) StreamReader(r io.Reader, filename string, callback motion.FrameCallback) (*motion.MotionData, error) {
+	data, err := io.ReadAll(r)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read C3D stream: %w", err)
+	}
+	return p.StreamBytes(data, filename, callback)
+}
+
+// ParseBytes parses C3D binary data from an in-memory byte slice.
+func (p *Parser) ParseBytes(data []byte, filename string) (*motion.MotionData, error) {
+	return p.StreamBytes(data, filename, nil)
+}
+
+// StreamBytes decodes C3D binary data and passes each frame to callback if non-nil.
+func (p *Parser) StreamBytes(data []byte, filename string, callback motion.FrameCallback) (*motion.MotionData, error) {
 
 	if len(data) < 512 {
 		return nil, fmt.Errorf("file too small for C3D header")
@@ -71,7 +122,7 @@ func (p *Parser) ParseFile(filePath string) (*motion.MotionData, error) {
 
 	motionData := &motion.MotionData{
 		Format:      "C3D",
-		FileName:    filePath,
+		FileName:    filename,
 		JointList:   pointNames,
 		FrameRate:   float64(header.FrameRate),
 		TotalFrames: totalFrames,
@@ -134,15 +185,21 @@ func (p *Parser) ParseFile(filePath string) (*motion.MotionData, error) {
 			rawVals = append(rawVals, x, y, z)
 		}
 
-		frame := motion.FrameData{
-			FrameIndex: f,
-			TimeSec:    float64(f) * motionData.FrameDuration,
-			Joints:     frameJoints,
-			Rotations:  make(map[string]motion.Vector3),
-			RawValues:  rawVals,
+		timeSec := float64(f) * motionData.FrameDuration
+		if callback != nil {
+			if err := callback(f, timeSec, frameJoints, make(map[string]motion.Vector3), nil); err != nil {
+				return nil, err
+			}
+		} else {
+			frame := motion.FrameData{
+				FrameIndex: f,
+				TimeSec:    timeSec,
+				Joints:     frameJoints,
+				Rotations:  make(map[string]motion.Vector3),
+				RawValues:  rawVals,
+			}
+			motionData.Frames = append(motionData.Frames, frame)
 		}
-
-		motionData.Frames = append(motionData.Frames, frame)
 		currPos += frameSize
 	}
 

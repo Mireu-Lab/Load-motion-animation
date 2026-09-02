@@ -1,8 +1,13 @@
+// Package trc provides a parser for Track Row Column (.trc) optical motion capture data files.
+//
+// TRC is an ASCII tab-delimited format widely used in biomechanics research and OpenSim
+// musculoskeletal simulations to record 3D trajectories of reflective optical markers over time.
 package trc
 
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 	"strings"
@@ -10,32 +15,57 @@ import (
 	"load-motion-animation/pkg/motion"
 )
 
-// Parser parses TRC (Track Row Column) motion files
+// Parser parses Track Row Column (.trc) optical motion files.
 type Parser struct{}
 
+var _ motion.StreamParser = (*Parser)(nil)
+
+// NewParser creates and returns a new TRC [Parser] instance.
 func NewParser() *Parser {
 	return &Parser{}
 }
 
+// ParseFile opens the specified TRC file and parses its header metadata and marker trajectories.
 func (p *Parser) ParseFile(filePath string) (*motion.MotionData, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open TRC file: %w", err)
 	}
 	defer file.Close()
+	return p.ParseReader(file, filePath)
+}
 
-	scanner := bufio.NewScanner(file)
+// StreamFile opens the specified TRC file and streams each frame to the provided callback without buffering all frames in memory.
+func (p *Parser) StreamFile(filePath string, callback motion.FrameCallback) (*motion.MotionData, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open TRC file: %w", err)
+	}
+	defer file.Close()
+	return p.StreamReader(file, filePath, callback)
+}
+
+// ParseReader decodes TRC marker coordinates and timestamps from an [io.Reader] stream into a complete [motion.MotionData] instance.
+func (p *Parser) ParseReader(r io.Reader, filename string) (*motion.MotionData, error) {
+	return p.StreamReader(r, filename, nil)
+}
+
+// StreamReader decodes TRC marker coordinates and timestamps from an [io.Reader] stream.
+// If callback is non-nil, each frame is passed to the callback without buffering all frames into memory.
+func (p *Parser) StreamReader(r io.Reader, filename string, callback motion.FrameCallback) (*motion.MotionData, error) {
+	scanner := bufio.NewScanner(r)
 	buf := make([]byte, 1024*1024)
 	scanner.Buffer(buf, 10*1024*1024)
 
 	motionData := &motion.MotionData{
 		Format:   "TRC",
-		FileName: filePath,
+		FileName: filename,
 		MetaData: make(map[string]string),
 	}
 
 	var markerNames []string
 	lineNum := 0
+	frameCount := 0
 
 	for scanner.Scan() {
 		lineNum++
@@ -88,16 +118,30 @@ func (p *Parser) ParseFile(filePath string) (*motion.MotionData, error) {
 				}
 			}
 
-			frame := motion.FrameData{
-				FrameIndex: frameIdx,
-				TimeSec:    timeSec,
-				Joints:     frameJoints,
-				Rotations:  make(map[string]motion.Vector3),
-				RawValues:  rawVals,
+			if callback != nil {
+				if err := callback(frameIdx, timeSec, frameJoints, make(map[string]motion.Vector3), nil); err != nil {
+					return nil, err
+				}
+			} else {
+				frame := motion.FrameData{
+					FrameIndex: frameIdx,
+					TimeSec:    timeSec,
+					Joints:     frameJoints,
+					Rotations:  make(map[string]motion.Vector3),
+					RawValues:  rawVals,
+				}
+				motionData.Frames = append(motionData.Frames, frame)
 			}
-
-			motionData.Frames = append(motionData.Frames, frame)
+			frameCount++
 		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, fmt.Errorf("error reading TRC data: %w", err)
+	}
+
+	if motionData.TotalFrames == 0 {
+		motionData.TotalFrames = frameCount
 	}
 
 	return motionData, nil

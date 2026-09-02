@@ -124,9 +124,67 @@ export_sql(motion, "motion.sql", db_type="postgresql")
 ## 🧪 5. 테스트 실행 (Run Tests)
 
 ```bash
-# Go 테스트
-go test -v ./tests
+# Go 테스트 및 커버리지
+go test -v -cover ./...
 
 # Python 테스트
 PYTHONPATH=python python3 -m unittest tests/test_python_loader.py
 ```
+
+---
+
+## 📖 6. GoDoc 문서화 (Go Documentation)
+
+본 프로젝트의 모든 Go 패키지 및 모듈은 표준 GoDoc 규격에 맞춰 상세한 주석과 Example 테스트 코드를 포함하고 있습니다.
+
+### 1) 터미널에서 빠른 API 문서 조회 (`go doc`)
+```bash
+# 패키지 개요 조회
+go doc ./pkg/motion
+go doc ./pkg/bvh
+
+# 특정 구조체 및 메서드 상세 조회
+go doc ./pkg/motion.MotionData
+go doc ./pkg/bvh.Parser
+go doc ./pkg/exporter.ExportSQLScript
+go doc ./pkg/visualizer.GIFOptions
+```
+
+### 2) 로컬 대화형 GoDoc 웹 서버 실행
+스크립트를 실행하면 로컬 웹 서버가 구동되어 브라우저에서 편리하게 API 문서를 열람할 수 있습니다:
+```bash
+./scripts/run_godoc.sh
+# 또는 포트 지정 (예: 6060)
+./scripts/run_godoc.sh 6060
+```
+- 브라우저 접속: `http://localhost:6060/pkg/load-motion-animation/`
+
+### 3) 정적 HTML GoDoc 문서 생성 (GitLab Pages 배포용)
+```bash
+# public/ 디렉토리에 정적 사이트 빌드
+./scripts/generate_godoc.sh public
+```
+
+---
+
+## 🦊 7. GitLab Runner CI/CD 파이프라인 (.gitlab-ci.yml)
+
+GitLab Runner 환경에서 자동으로 빌드, 테스트, 문서화, 배포가 수행되도록 다단계 CI/CD 파이프라인을 지원합니다.
+
+### 🔄 파이프라인 단계 (Stages)
+
+| 단계 (Stage) | Job 이름 | 실행 내용 | 실행 조건 |
+| :--- | :--- | :--- | :--- |
+| **test** | `test:go` | Go 1.22 환경에서 `go vet`, 단위 테스트, Example 테스트, CLI 빌드 검증 및 테스트 커버리지 리포트 생성 | Push, MR |
+| **test** | `test:python` | Python 3.11 환경에서 Go 엔진 아티팩트와 연동한 모션 로더 테스트 및 sdist/wheel 패키지 빌드 | Push, MR |
+| **build** | `build:cross-platform` | Linux/macOS/Windows (amd64, arm64) 5종 크로스 컴파일 바이너리 빌드 및 아티팩트 보관 | `main`, Tag |
+| **docs** | `verify:godoc` | Merge Request 시 정적 GoDoc 빌드 무결성 사전 검증 | MR |
+| **docs** | `pages` | GoDoc 정적 웹 문서를 생성하여 **GitLab Pages** 사이트로 자동 호스팅 배포 | `main`, Tag |
+| **release** | `release:gitlab` | 태그 푸시 시 `release-cli`를 통해 GitLab Release 자동 발행 및 크로스 바이너리 첨부 | Tag (`v*`) |
+| **release** | `publish:pypi` | 태그 푸시 시 PyPI로 Python 라이브러리 자동 배포 (선택적) | Tag (`v*`) |
+| **release** | `trigger:godoc-index` | 태그 푸시 시 `proxy.golang.org` 인덱싱 요청으로 `pkg.go.dev` 공식 문서 갱신 | Tag (`v*`) |
+
+### ⚡ GitLab Runner 설정 최적화
+- **Docker Executor**: `golang:1.22`, `python:3.11`, `curlimages/curl` 등 표준 컨테이너 이미지 기반 구동
+- **아티팩트 파이프라인 연계**: `test:python` 단계에서 Go 빌드 컴파일러 설치 없이 `test:go`의 `bin/motion-parser` 바이너리 아티팩트를 직접 전달받아 초고속 테스트 실행
+- **캐싱 (Caching)**: `.go/pkg/mod/` 및 `.cache/pip/` 경로를 캐싱하여 러너 실행 시간을 대폭 단축

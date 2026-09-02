@@ -1,3 +1,5 @@
+// Package visualizer provides 2D projection, skeletal bone rendering, and animated GIF
+// generation from 3D motion capture joint trajectories.
 package visualizer
 
 import (
@@ -6,26 +8,37 @@ import (
 	"image/color"
 	"image/draw"
 	"image/gif"
+	"io"
 	"math"
 	"os"
 
 	"load-motion-animation/pkg/motion"
 )
 
-// GIFOptions specifies options for generating GIF animations
+// GIFOptions specifies customizable visualization and rendering parameters for animated GIF export.
 type GIFOptions struct {
-	Width       int
-	Height      int
-	FPS         int
-	Scale       float64
-	Padding     int
-	MaxFrames   int // 0 for all frames
-	LineColor   color.RGBA
-	PointColor  color.RGBA
-	BGColor     color.RGBA
+	// Width is the output canvas width in pixels.
+	Width int
+	// Height is the output canvas height in pixels.
+	Height int
+	// FPS is the playback animation frame rate (frames per second).
+	FPS int
+	// Scale is the geometric rendering magnification multiplier.
+	Scale float64
+	// Padding is the boundary margin in pixels around the rendered skeleton.
+	Padding int
+	// MaxFrames limits the maximum number of frames rendered (0 for unlimited).
+	MaxFrames int
+	// LineColor is the RGBA color used for skeleton bones connecting joints.
+	LineColor color.RGBA
+	// PointColor is the RGBA color used for joint nodes and markers.
+	PointColor color.RGBA
+	// BGColor is the background fill color of the canvas.
+	BGColor color.RGBA
 }
 
-// DefaultGIFOptions returns sensible default options
+// DefaultGIFOptions returns sensible default rendering options:
+// 400x400 canvas, 20 FPS, maximum 120 frames, dark slate background, modern blue bones, and vibrant red joints.
 func DefaultGIFOptions() GIFOptions {
 	return GIFOptions{
 		Width:      400,
@@ -40,8 +53,19 @@ func DefaultGIFOptions() GIFOptions {
 	}
 }
 
-// ExportGIF renders motion skeleton trajectories into an animated GIF
+// ExportGIF renders 3D motion skeleton trajectories into an animated GIF and saves it to a file.
 func ExportGIF(m *motion.MotionData, outputPath string, opts GIFOptions) error {
+	file, err := os.Create(outputPath)
+	if err != nil {
+		return fmt.Errorf("failed to create GIF file: %w", err)
+	}
+	defer file.Close()
+
+	return ExportGIFWriter(m, file, opts)
+}
+
+// ExportGIFWriter renders motion frames into an animated GIF and streams the encoded data into an [io.Writer].
+func ExportGIFWriter(m *motion.MotionData, w io.Writer, opts GIFOptions) error {
 	if len(m.Frames) == 0 {
 		return fmt.Errorf("no frames to export to GIF")
 	}
@@ -155,13 +179,7 @@ func ExportGIF(m *motion.MotionData, outputPath string, opts GIFOptions) error {
 		outGIF.Delay = append(outGIF.Delay, delay)
 	}
 
-	outFile, err := os.Create(outputPath)
-	if err != nil {
-		return fmt.Errorf("failed to create GIF file: %w", err)
-	}
-	defer outFile.Close()
-
-	if err := gif.EncodeAll(outFile, outGIF); err != nil {
+	if err := gif.EncodeAll(w, outGIF); err != nil {
 		return fmt.Errorf("failed to encode GIF: %w", err)
 	}
 

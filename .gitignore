@@ -1,5 +1,6 @@
 # Binaries & build output
 bin/
+release_dist/
 *.exe
 *.exe;
 *.dll
@@ -12,6 +13,15 @@ bin/
 *.tsv
 *.sql
 *.json
+coverage.out
+coverage.txt
+
+# Godoc static build (GitLab Pages output)
+public/
+
+# GitLab Runner / Go / Python caches
+.go/
+.cache/
 
 # Python
 __pycache__/

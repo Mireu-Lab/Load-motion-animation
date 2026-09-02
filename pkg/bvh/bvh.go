@@ -1,8 +1,16 @@
+// Package bvh implements a high-performance parser for BioVision Hierarchy (.bvh)
+// motion capture files.
+//
+// The parser reads the HIERARCHY section to construct an articulated skeletal tree,
+// parses the MOTION section frame by frame, and calculates 3D world-space coordinates
+// for each joint using forward kinematics (matrix concatenation).
+// It supports both in-memory loading and memory-efficient streaming playback via [FrameCallback].
 package bvh
 
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"math"
 	"os"
 	"strconv"
@@ -11,9 +19,18 @@ import (
 	"load-motion-animation/pkg/motion"
 )
 
-// Parser handles parsing of BioVision Hierarchy (.bvh) files
+// FrameCallback is invoked for each parsed frame during streaming mode execution.
+// It receives the zero-based frameIndex, elapsed time in seconds, world-space joint positions,
+// joint Euler rotations (in degrees), and a pointer to the skeletal root joint.
+// If the callback returns an error, streaming parsing is halted immediately.
+type FrameCallback = motion.FrameCallback
+
+// Parser handles decoding and kinematic analysis of BioVision Hierarchy (.bvh) files.
 type Parser struct{}
 
+var _ motion.StreamParser = (*Parser)(nil)
+
+// NewParser creates and initializes a new BVH [Parser] instance.
 func NewParser() *Parser {
 	return &Parser{}
 }
@@ -23,14 +40,37 @@ type channelTarget struct {
 	ChannelType string // Xposition, Yposition, Zposition, Zrotation, Xrotation, Yrotation, etc.
 }
 
+// ParseFile opens the specified BVH file on the filesystem and parses its skeletal hierarchy
+// and motion frames into a unified [motion.MotionData] structure.
 func (p *Parser) ParseFile(filePath string) (*motion.MotionData, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open BVH file: %w", err)
 	}
 	defer file.Close()
+	return p.ParseReader(file, filePath)
+}
 
-	scanner := bufio.NewScanner(file)
+// StreamFile opens the given BVH file and streams each frame to the provided callback without buffering all frames in memory.
+func (p *Parser) StreamFile(filePath string, callback FrameCallback) (*motion.MotionData, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open BVH file: %w", err)
+	}
+	defer file.Close()
+	return p.StreamReader(file, filePath, callback)
+}
+
+// ParseReader decodes BVH motion data from any [io.Reader] stream into a complete [motion.MotionData] instance.
+func (p *Parser) ParseReader(r io.Reader, filename string) (*motion.MotionData, error) {
+	return p.StreamReader(r, filename, nil)
+}
+
+// StreamReader decodes BVH motion data from an [io.Reader] line-by-line.
+// If a non-nil callback is supplied, each frame is passed to the callback without buffering
+// all frames into memory, allowing memory-efficient streaming of large motion files.
+func (p *Parser) StreamReader(r io.Reader, filename string, callback FrameCallback) (*motion.MotionData, error) {
+	scanner := bufio.NewScanner(r)
 	// Buffer capacity for long motion data lines
 	buf := make([]byte, 1024*1024)
 	scanner.Buffer(buf, 10*1024*1024)
@@ -45,10 +85,11 @@ func (p *Parser) ParseFile(filePath string) (*motion.MotionData, error) {
 
 	motionData := &motion.MotionData{
 		Format:   "BVH",
-		FileName: filePath,
+		FileName: filename,
 		MetaData: make(map[string]string),
 	}
 
+	frameIdx := 0
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 		if line == "" {
@@ -159,7 +200,6 @@ func (p *Parser) ParseFile(filePath string) (*motion.MotionData, error) {
 					continue
 				}
 
-				frameIdx := len(motionData.Frames)
 				rawVals := make([]float64, len(fields))
 				jointValues := make(map[string]map[string]float64)
 
@@ -178,21 +218,32 @@ func (p *Parser) ParseFile(filePath string) (*motion.MotionData, error) {
 				// Compute forward kinematics positions for skeleton joints
 				jointPositions, jointRotations := computeForwardKinematics(root, jointValues)
 
-				frame := motion.FrameData{
-					FrameIndex: frameIdx,
-					TimeSec:    float64(frameIdx) * motionData.FrameDuration,
-					Joints:     jointPositions,
-					Rotations:  jointRotations,
-					RawValues:  rawVals,
+				timeSec := float64(frameIdx) * motionData.FrameDuration
+				if callback != nil {
+					if err := callback(frameIdx, timeSec, jointPositions, jointRotations, root); err != nil {
+						return nil, err
+					}
+				} else {
+					frame := motion.FrameData{
+						FrameIndex: frameIdx,
+						TimeSec:    timeSec,
+						Joints:     jointPositions,
+						Rotations:  jointRotations,
+						RawValues:  rawVals,
+					}
+					motionData.Frames = append(motionData.Frames, frame)
 				}
-
-				motionData.Frames = append(motionData.Frames, frame)
+				frameIdx++
 			}
 		}
 	}
 
 	if err := scanner.Err(); err != nil {
 		return nil, fmt.Errorf("error reading BVH file: %w", err)
+	}
+
+	if motionData.TotalFrames == 0 {
+		motionData.TotalFrames = frameIdx
 	}
 
 	motionData.RootJoint = root

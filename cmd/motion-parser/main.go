@@ -1,3 +1,17 @@
+// motion-parser is a high-performance command-line utility for parsing, converting,
+// and visualizing 3D/2D motion capture files (.bvh, .c3d, .trc).
+//
+// Usage:
+//
+//	motion-parser -input <file_path> [-export summary|csv|tsv|sql|json|gif] [-output <output_path>]
+//
+// Options:
+//
+//	-input       Path to motion capture file (.bvh, .c3d, .trc)
+//	-export      Export target: summary, csv, tsv, sql, json, gif (default: summary)
+//	-output      Target output file path
+//	-max-frames  Maximum frames to render when exporting to GIF (default: 120)
+//	-db          RDBMS SQL dialect for table DDL and insert statements: sqlite, postgresql, mysql (default: sqlite)
 package main
 
 import (
@@ -23,11 +37,12 @@ func main() {
 	outputFile := flag.String("output", "", "Output file path (default: input file name with extension)")
 	maxFrames := flag.Int("max-frames", 120, "Maximum frames for GIF rendering")
 	dbType := flag.String("db", "sqlite", "RDBMS dialect for SQL export: sqlite, postgresql, mysql")
+	streamMode := flag.Bool("stream", false, "Enable low-memory streaming mode for large files (csv, tsv, sql, json)")
 
 	flag.Parse()
 
 	if *inputFile == "" {
-		fmt.Println("Usage: motion-parser -input <file_path> [-export csv|tsv|sql|json|gif|summary] [-output <output_path>]")
+		fmt.Println("Usage: motion-parser -input <file_path> [-export csv|tsv|sql|json|gif|summary] [-output <output_path>] [-stream]")
 		os.Exit(1)
 	}
 
@@ -43,6 +58,64 @@ func main() {
 		parser = trc.NewParser()
 	default:
 		log.Fatalf("Unsupported file extension: %s. Supported: .bvh, .c3d, .trc", ext)
+	}
+
+	if *streamMode {
+		streamParser, ok := parser.(motion.StreamParser)
+		if !ok {
+			log.Fatalf("Parser for %s does not support streaming mode", ext)
+		}
+
+		fmt.Printf("⚡ Running in low-memory streaming mode: %s ...\n", *inputFile)
+		switch *outputFormat {
+		case "csv":
+			out := *outputFile
+			if out == "" {
+				out = strings.TrimSuffix(*inputFile, ext) + ".csv"
+			}
+			meta, err := exporter.ExportStreamCSV(streamParser, *inputFile, out)
+			if err != nil {
+				log.Fatalf("❌ Failed to stream export CSV: %v", err)
+			}
+			fmt.Printf("💾 Streamed CSV to: %s (Total Frames: %d)\n", out, meta.TotalFrames)
+			return
+		case "tsv":
+			out := *outputFile
+			if out == "" {
+				out = strings.TrimSuffix(*inputFile, ext) + ".tsv"
+			}
+			meta, err := exporter.ExportStreamTSV(streamParser, *inputFile, out)
+			if err != nil {
+				log.Fatalf("❌ Failed to stream export TSV: %v", err)
+			}
+			fmt.Printf("💾 Streamed TSV to: %s (Total Frames: %d)\n", out, meta.TotalFrames)
+			return
+		case "sql":
+			out := *outputFile
+			if out == "" {
+				out = strings.TrimSuffix(*inputFile, ext) + ".sql"
+			}
+			rdbType := exporter.RDBMSType(*dbType)
+			meta, err := exporter.ExportStreamSQLScript(streamParser, *inputFile, out, rdbType, "motion_frames")
+			if err != nil {
+				log.Fatalf("❌ Failed to stream export SQL: %v", err)
+			}
+			fmt.Printf("💾 Streamed SQL script (%s) to: %s (Total Frames: %d)\n", *dbType, out, meta.TotalFrames)
+			return
+		case "json", "ndjson":
+			out := *outputFile
+			if out == "" {
+				out = strings.TrimSuffix(*inputFile, ext) + ".ndjson"
+			}
+			meta, err := exporter.ExportStreamMongoLines(streamParser, *inputFile, out)
+			if err != nil {
+				log.Fatalf("❌ Failed to stream export NDJSON: %v", err)
+			}
+			fmt.Printf("💾 Streamed NDJSON lines to: %s (Total Frames: %d)\n", out, meta.TotalFrames)
+			return
+		default:
+			fmt.Println("⚠️ Streaming mode only supports csv, tsv, sql, and json/ndjson exports. Falling back to in-memory mode...")
+		}
 	}
 
 	fmt.Printf("📂 Loading motion file: %s ...\n", *inputFile)
