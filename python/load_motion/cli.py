@@ -1,18 +1,40 @@
 import argparse
 import sys
 import os
-from .parser import load_motion
+from .parser import load_motion, iter_motion_frames
 from .dataframe import to_dataframe
-from .exporter import export_csv, export_sql, export_json
+from .exporter import export_csv, export_sql, export_json, export_stream_csv, export_stream_sql
+from .visualizer import export_gif
 
 def main():
     parser = argparse.ArgumentParser(description="Load-Motion-Animation CLI (Python)")
     parser.add_argument("-input", required=True, help="Path to motion file (.bvh, .c3d, .trc)")
-    parser.add_argument("-export", choices=["summary", "csv", "tsv", "sql", "json"], default="summary", help="Export format")
+    parser.add_argument("-export", choices=["summary", "csv", "tsv", "sql", "json", "gif"], default="summary", help="Export format")
     parser.add_argument("-output", help="Output file path")
     parser.add_argument("-db", choices=["sqlite", "postgresql", "mysql"], default="sqlite", help="RDBMS dialect for SQL export")
+    parser.add_argument("-max-frames", type=int, default=120, help="Maximum frames for GIF rendering")
+    parser.add_argument("-stream", action="store_true", help="Enable low-memory streaming mode")
 
     args = parser.parse_args()
+
+    if args.stream and args.export in ("csv", "tsv", "sql"):
+        print(f"⚡ Streaming motion file: {args.input} ...")
+        frames_iter = iter_motion_frames(args.input)
+        if args.export == "csv":
+            out = args.output or (os.path.splitext(args.input)[0] + ".csv")
+            export_stream_csv(frames_iter, out, delimiter=",")
+            print(f"💾 Streamed CSV to: {out}")
+            return
+        elif args.export == "tsv":
+            out = args.output or (os.path.splitext(args.input)[0] + ".tsv")
+            export_stream_csv(frames_iter, out, delimiter="\t")
+            print(f"💾 Streamed TSV to: {out}")
+            return
+        elif args.export == "sql":
+            out = args.output or (os.path.splitext(args.input)[0] + ".sql")
+            export_stream_sql(frames_iter, out, db_type=args.db, file_name=args.input)
+            print(f"💾 Streamed SQL ({args.db}) script to: {out}")
+            return
 
     print(f"📂 Loading motion file: {args.input} ...")
     try:
@@ -53,6 +75,11 @@ def main():
         out = args.output or (os.path.splitext(args.input)[0] + ".json")
         export_json(motion_data, out)
         print(f"💾 Exported JSON document to: {out}")
+
+    elif args.export == "gif":
+        out = args.output or (os.path.splitext(args.input)[0] + ".gif")
+        export_gif(motion_data, out, max_frames=args.max_frames)
+        print(f"🎬 Rendered animated GIF to: {out}")
 
 if __name__ == "__main__":
     main()
