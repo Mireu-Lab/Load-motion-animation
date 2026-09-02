@@ -1,7 +1,7 @@
 import os
 import struct
 import math
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Iterator, Tuple
 
 class Vector3:
     __slots__ = ('x', 'y', 'z')
@@ -132,6 +132,90 @@ class BVHParser:
 
         return motion_data
 
+    def iter_frames(self, file_path: str) -> Iterator[FrameData]:
+        """Stream frames one-by-one from BVH file using a generator."""
+        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            joint_stack: List[Joint] = []
+            channel_map = []
+            root_joint = None
+            frame_duration = 0.0
+            in_hierarchy = False
+            in_motion = False
+            frame_idx = 0
+
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                tokens = line.split()
+                if not tokens:
+                    continue
+
+                tag = tokens[0]
+                if tag == "HIERARCHY":
+                    in_hierarchy = True
+                    continue
+                elif tag == "MOTION":
+                    in_hierarchy = False
+                    in_motion = True
+                    continue
+
+                if in_hierarchy:
+                    if tag in ("ROOT", "JOINT"):
+                        name = tokens[1]
+                        joint = Joint(name)
+                        if joint_stack:
+                            joint.parent_name = joint_stack[-1].name
+                            joint_stack[-1].children.append(joint)
+                        else:
+                            root_joint = joint
+                        joint_stack.append(joint)
+                    elif tag == "End":
+                        parent = joint_stack[-1]
+                        joint = Joint(f"{parent.name}_End", parent_name=parent.name)
+                        parent.children.append(joint)
+                        joint_stack.append(joint)
+                    elif tag == "}":
+                        if joint_stack:
+                            joint_stack.pop()
+                    elif tag == "OFFSET":
+                        if len(tokens) >= 4 and joint_stack:
+                            curr = joint_stack[-1]
+                            curr.offset = Vector3(float(tokens[1]), float(tokens[2]), float(tokens[3]))
+                    elif tag == "CHANNELS":
+                        if len(tokens) >= 2 and joint_stack:
+                            num_ch = int(tokens[1])
+                            curr = joint_stack[-1]
+                            for i in range(num_ch):
+                                ch = tokens[2 + i]
+                                curr.channels.append(ch)
+                                channel_map.append((curr.name, ch))
+
+                elif in_motion:
+                    if line.startswith("Frames:"):
+                        pass
+                    elif line.startswith("Frame Time:"):
+                        dur = float(tokens[2])
+                        frame_duration = dur
+                    else:
+                        vals = [float(x) for x in tokens]
+                        frame = FrameData(frame_idx, frame_idx * frame_duration)
+                        frame.raw_values = vals
+
+                        joint_vals: Dict[str, Dict[str, float]] = {}
+                        for idx, val in enumerate(vals):
+                            if idx < len(channel_map):
+                                jname, chtype = channel_map[idx]
+                                if jname not in joint_vals:
+                                    joint_vals[jname] = {}
+                                joint_vals[jname][chtype] = val
+
+                        identity_mat = (1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0)
+                        self._compute_fk_fast(root_joint, identity_mat, joint_vals, frame.joints, frame.rotations)
+                        yield frame
+                        frame_idx += 1
+
+
     def _compute_fk_fast(self, joint: Optional[Joint], M: tuple, joint_vals: Dict[str, Dict[str, float]], positions: Dict[str, Vector3], rotations: Dict[str, Vector3]):
         if not joint:
             return
@@ -261,6 +345,12 @@ class C3DParser:
 
         return motion_data
 
+    def iter_frames(self, file_path: str) -> Iterator[FrameData]:
+        """Stream frames one-by-one from C3D file."""
+        motion_data = self.parse(file_path)
+        for frame in motion_data.frames:
+            yield frame
+
 class TRCParser:
     def parse(self, file_path: str) -> MotionData:
         motion_data = MotionData("TRC", file_path)
@@ -297,7 +387,39 @@ class TRCParser:
 
         return motion_data
 
+    def iter_frames(self, file_path: str) -> Iterator[FrameData]:
+        """Stream frames one-by-one from TRC file."""
+        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            marker_names = []
+            frame_duration = 0.0
+            for line_num, line in enumerate(f, 1):
+                line = line.strip()
+                if not line:
+                    continue
+                fields = line.split("\t") if "\t" in line else line.split()
+                if line_num == 3 and len(fields) >= 3:
+                    data_rate = float(fields[0])
+                    if data_rate > 0:
+                        frame_duration = 1.0 / data_rate
+                elif line_num == 4:
+                    marker_names = [m.strip() for m in fields[2:] if m.strip()]
+                elif line_num >= 6:
+                    if len(fields) < 2:
+                        continue
+                    frame_idx = int(fields[0])
+                    time_sec = float(fields[1])
+                    frame = FrameData(frame_idx, time_sec)
+                    val_idx = 2
+                    for m_name in marker_names:
+                        if val_idx + 2 < len(fields):
+                            x, y, z = float(fields[val_idx]), float(fields[val_idx+1]), float(fields[val_idx+2])
+                            frame.joints[m_name] = Vector3(x, y, z)
+                            frame.raw_values.extend([x, y, z])
+                            val_idx += 3
+                    yield frame
+
 def load_motion(file_path: str) -> MotionData:
+    """Load complete motion dataset into memory from a file (.bvh, .c3d, .trc)."""
     ext = os.path.splitext(file_path)[1].lower()
     if ext == ".bvh":
         return BVHParser().parse(file_path)
@@ -307,3 +429,38 @@ def load_motion(file_path: str) -> MotionData:
         return TRCParser().parse(file_path)
     else:
         raise ValueError(f"Unsupported file format: {ext}")
+
+def iter_motion_frames(file_path: str) -> Iterator[FrameData]:
+    """Stream motion frames one-by-one as a generator for low-memory processing."""
+    ext = os.path.splitext(file_path)[1].lower()
+    if ext == ".bvh":
+        return BVHParser().iter_frames(file_path)
+    elif ext == ".c3d":
+        return C3DParser().iter_frames(file_path)
+    elif ext == ".trc":
+        return TRCParser().iter_frames(file_path)
+    else:
+        raise ValueError(f"Unsupported file format: {ext}")
+
+def load_motion_stream(file_path: str) -> Tuple[MotionData, Iterator[FrameData]]:
+    """Load metadata container and return an iterator yielding each frame."""
+    ext = os.path.splitext(file_path)[1].lower()
+    if ext == ".bvh":
+        p = BVHParser()
+        data = p.parse(file_path)
+        data.frames = []  # Clear buffered frames for low memory
+        return data, p.iter_frames(file_path)
+    elif ext == ".c3d":
+        p = C3DParser()
+        data = p.parse(file_path)
+        frames = data.frames
+        data.frames = []
+        return data, iter(frames)
+    elif ext == ".trc":
+        p = TRCParser()
+        data = p.parse(file_path)
+        data.frames = []
+        return data, p.iter_frames(file_path)
+    else:
+        raise ValueError(f"Unsupported file format: {ext}")
+
