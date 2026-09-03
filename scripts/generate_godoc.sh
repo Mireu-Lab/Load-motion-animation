@@ -32,7 +32,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-MODULE_PATH="$(go list -m 2>/dev/null || echo "gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation")"
+MODULE_PATH="$(go list -m 2>/dev/null || echo "gitlab.com/mireu-lab/Load-motion-animation")"
 
 # 3. Wait for godoc to be ready
 echo "Waiting for godoc server to be ready on ${HOST}:${PORT}..."

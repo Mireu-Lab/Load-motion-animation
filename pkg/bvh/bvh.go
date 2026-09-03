@@ -16,7 +16,7 @@ import (
 	"strconv"
 	"strings"
 
-	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/motion"
+	"gitlab.com/mireu-lab/Load-motion-animation/pkg/motion"
 )
 
 // FrameCallback is invoked for each parsed frame during streaming mode execution.

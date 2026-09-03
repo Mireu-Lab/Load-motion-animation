@@ -3,8 +3,8 @@ package df_test
 import (
 	"fmt"
 
-	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/df"
-	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/motion"
+	"gitlab.com/mireu-lab/Load-motion-animation/pkg/df"
+	"gitlab.com/mireu-lab/Load-motion-animation/pkg/motion"
 )
 
 func ExampleFromMotionData() {

@@ -10,7 +10,7 @@ if ! command -v godoc &> /dev/null; then
     go install golang.org/x/tools/cmd/godoc@latest
 fi
 
-MODULE_PATH="$(go list -m 2>/dev/null || echo "gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation")"
+MODULE_PATH="$(go list -m 2>/dev/null || echo "gitlab.com/mireu-lab/Load-motion-animation")"
 
 echo "========================================================"
 echo " Starting local Godoc server for Load-motion-animation"

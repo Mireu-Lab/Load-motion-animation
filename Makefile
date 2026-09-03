@@ -28,7 +28,7 @@ build-all:
 	GOOS=darwin GOARCH=arm64 go build -o release_dist/motion-parser-darwin-arm64 ./cmd/motion-parser
 	GOOS=windows GOARCH=amd64 go build -o release_dist/motion-parser-windows-amd64.exe ./cmd/motion-parser
 
-## Run interactive local Godoc server (http://localhost:6060/pkg/gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/)
+## Run interactive local Godoc server (http://localhost:6060/pkg/gitlab.com/mireu-lab/Load-motion-animation/)
 godoc:
 	./scripts/run_godoc.sh
 

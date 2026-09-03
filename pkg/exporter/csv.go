@@ -12,7 +12,7 @@ import (
 	"os"
 	"strconv"
 
-	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/motion"
+	"gitlab.com/mireu-lab/Load-motion-animation/pkg/motion"
 )
 
 // ExportCSV exports motion frames to a comma-separated values (CSV) file on disk.

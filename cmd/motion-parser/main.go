@@ -22,13 +22,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/bvh"
-	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/c3d"
-	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/df"
-	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/exporter"
-	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/motion"
-	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/trc"
-	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/visualizer"
+	"gitlab.com/mireu-lab/Load-motion-animation/pkg/bvh"
+	"gitlab.com/mireu-lab/Load-motion-animation/pkg/c3d"
+	"gitlab.com/mireu-lab/Load-motion-animation/pkg/df"
+	"gitlab.com/mireu-lab/Load-motion-animation/pkg/exporter"
+	"gitlab.com/mireu-lab/Load-motion-animation/pkg/motion"
+	"gitlab.com/mireu-lab/Load-motion-animation/pkg/trc"
+	"gitlab.com/mireu-lab/Load-motion-animation/pkg/visualizer"
 )
 
 func main() {

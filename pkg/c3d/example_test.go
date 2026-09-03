@@ -3,7 +3,7 @@ package c3d_test
 import (
 	"fmt"
 
-	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/c3d"
+	"gitlab.com/mireu-lab/Load-motion-animation/pkg/c3d"
 )
 
 func ExampleNewParser() {

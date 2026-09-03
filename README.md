@@ -75,8 +75,8 @@ package main
 
 import (
     "fmt"
-    "gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/bvh"
-    "gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/df"
+    "gitlab.com/mireu-lab/Load-motion-animation/pkg/bvh"
+    "gitlab.com/mireu-lab/Load-motion-animation/pkg/df"
 )
 
 func main() {
@@ -157,7 +157,7 @@ go doc ./pkg/visualizer.GIFOptions
 # 또는 포트 지정 (예: 6060)
 ./scripts/run_godoc.sh 6060
 ```
-- 브라우저 접속: `http://localhost:6060/pkg/gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/`
+- 브라우저 접속: `http://localhost:6060/pkg/gitlab.com/mireu-lab/Load-motion-animation/`
 
 ### 3) 정적 HTML GoDoc 문서 생성 (GitLab Pages 배포용)
 ```bash

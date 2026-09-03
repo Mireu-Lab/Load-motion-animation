@@ -6,7 +6,7 @@ package df
 import (
 	"fmt"
 
-	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/motion"
+	"gitlab.com/mireu-lab/Load-motion-animation/pkg/motion"
 )
 
 // Row represents a single flattened tabular record representing a joint's 3D state in a frame.
