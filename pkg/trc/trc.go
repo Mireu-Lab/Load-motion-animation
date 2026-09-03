@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"strings"
 
-	"load-motion-animation/pkg/motion"
+	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/motion"
 )
 
 // Parser parses Track Row Column (.trc) optical motion files.

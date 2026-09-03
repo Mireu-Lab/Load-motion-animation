@@ -32,11 +32,13 @@ cleanup() {
 }
 trap cleanup EXIT
 
+MODULE_PATH="$(go list -m 2>/dev/null || echo "gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation")"
+
 # 3. Wait for godoc to be ready
 echo "Waiting for godoc server to be ready on ${HOST}:${PORT}..."
 READY=0
 for i in {1..30}; do
-    if curl -s "http://${HOST}:${PORT}/pkg/load-motion-animation/" > /dev/null 2>&1; then
+    if curl -s "http://${HOST}:${PORT}/pkg/${MODULE_PATH}/" > /dev/null 2>&1; then
         READY=1
         break
     fi
@@ -55,7 +57,7 @@ pushd "${TEMP_SCRAPE}" > /dev/null
 echo "Mirroring documentation pages and assets..."
 wget -q -m -k -E -np \
     -e robots=off \
-    "http://${HOST}:${PORT}/pkg/load-motion-animation/" \
+    "http://${HOST}:${PORT}/pkg/${MODULE_PATH}/" \
     "http://${HOST}:${PORT}/lib/godoc/" || true
 
 popd > /dev/null
@@ -65,21 +67,21 @@ if [ -d "${TEMP_SCRAPE}/${HOST}:${PORT}" ]; then
 fi
 rm -rf "${TEMP_SCRAPE}"
 
-# 5. Create root redirection to load-motion-animation package docs
-cat << 'HTML' > "${OUT_DIR}/index.html"
+# 5. Create root redirection to module package docs
+cat << HTML > "${OUT_DIR}/index.html"
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0; url=pkg/load-motion-animation/index.html">
+    <meta http-equiv="refresh" content="0; url=pkg/${MODULE_PATH}/index.html">
     <title>Load-motion-animation Godoc</title>
     <script>
-        window.location.href = "pkg/load-motion-animation/index.html";
+        window.location.href = "pkg/${MODULE_PATH}/index.html";
     </script>
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; text-align: center; padding-top: 60px;">
     <h2>Load-motion-animation Documentation</h2>
-    <p>Redirecting to <a href="pkg/load-motion-animation/index.html">Package Documentation</a>...</p>
+    <p>Redirecting to <a href="pkg/${MODULE_PATH}/index.html">Package Documentation</a>...</p>
 </body>
 </html>
 HTML

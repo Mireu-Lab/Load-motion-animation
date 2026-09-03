@@ -6,13 +6,13 @@ import (
 	"strings"
 	"testing"
 
-	"load-motion-animation/pkg/bvh"
-	"load-motion-animation/pkg/c3d"
-	"load-motion-animation/pkg/df"
-	"load-motion-animation/pkg/exporter"
-	"load-motion-animation/pkg/motion"
-	"load-motion-animation/pkg/trc"
-	"load-motion-animation/pkg/visualizer"
+	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/bvh"
+	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/c3d"
+	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/df"
+	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/exporter"
+	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/motion"
+	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/trc"
+	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/visualizer"
 )
 
 func TestBVHParser(t *testing.T) {

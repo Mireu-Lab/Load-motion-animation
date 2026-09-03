@@ -12,7 +12,7 @@ import (
 	"math"
 	"os"
 
-	"load-motion-animation/pkg/motion"
+	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/motion"
 )
 
 // GIFOptions specifies customizable visualization and rendering parameters for animated GIF export.

@@ -10,10 +10,12 @@ if ! command -v godoc &> /dev/null; then
     go install golang.org/x/tools/cmd/godoc@latest
 fi
 
+MODULE_PATH="$(go list -m 2>/dev/null || echo "gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation")"
+
 echo "========================================================"
 echo " Starting local Godoc server for Load-motion-animation"
 echo " Open your browser at:"
-echo "   http://${HOST}:${PORT}/pkg/load-motion-animation/"
+echo "   http://${HOST}:${PORT}/pkg/${MODULE_PATH}/"
 echo " Press Ctrl+C to stop the server."
 echo "========================================================"
 

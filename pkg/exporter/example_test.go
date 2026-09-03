@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"load-motion-animation/pkg/exporter"
-	"load-motion-animation/pkg/motion"
+	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/exporter"
+	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/motion"
 )
 
 func ExampleExportCSVWriter() {

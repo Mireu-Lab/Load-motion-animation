@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"load-motion-animation/pkg/motion"
+	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/motion"
 )
 
 // RDBMSType specifies the target relational database SQL dialect.

@@ -3,7 +3,7 @@ package motion_test
 import (
 	"fmt"
 
-	"load-motion-animation/pkg/motion"
+	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/motion"
 )
 
 func ExampleVector3() {

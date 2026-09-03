@@ -3,7 +3,7 @@ package visualizer_test
 import (
 	"fmt"
 
-	"load-motion-animation/pkg/visualizer"
+	"gitlab.com/none-labs/behavioral-psychology-projects/Load-motion-animation/pkg/visualizer"
 )
 
 func ExampleDefaultGIFOptions() {
