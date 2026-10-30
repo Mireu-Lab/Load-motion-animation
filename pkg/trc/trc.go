@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"strings"
 
-	"gitlab.com/mireu-lab/Load-motion-animation/pkg/motion"
+	"github.com/Mireu-Lab/Load-motion-animation/pkg/motion"
 )
 
 // Parser parses Track Row Column (.trc) optical motion files.

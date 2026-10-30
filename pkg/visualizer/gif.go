@@ -12,7 +12,7 @@ import (
 	"math"
 	"os"
 
-	"gitlab.com/mireu-lab/Load-motion-animation/pkg/motion"
+	"github.com/Mireu-Lab/Load-motion-animation/pkg/motion"
 )
 
 // GIFOptions specifies customizable visualization and rendering parameters for animated GIF export.

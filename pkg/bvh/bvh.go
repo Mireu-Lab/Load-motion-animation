@@ -16,7 +16,7 @@ import (
 	"strconv"
 	"strings"
 
-	"gitlab.com/mireu-lab/Load-motion-animation/pkg/motion"
+	"github.com/Mireu-Lab/Load-motion-animation/pkg/motion"
 )
 
 // FrameCallback is invoked for each parsed frame during streaming mode execution.

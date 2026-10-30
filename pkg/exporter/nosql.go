@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 
-	"gitlab.com/mireu-lab/Load-motion-animation/pkg/motion"
+	"github.com/Mireu-Lab/Load-motion-animation/pkg/motion"
 )
 
 // ExportJSON exports the complete [motion.MotionData] structure as an indented JSON document to a file.

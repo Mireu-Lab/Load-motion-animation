@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"gitlab.com/mireu-lab/Load-motion-animation/pkg/motion"
+	"github.com/Mireu-Lab/Load-motion-animation/pkg/motion"
 )
 
 // RDBMSType specifies the target relational database SQL dialect.

@@ -3,7 +3,7 @@ package motion_test
 import (
 	"fmt"
 
-	"gitlab.com/mireu-lab/Load-motion-animation/pkg/motion"
+	"github.com/Mireu-Lab/Load-motion-animation/pkg/motion"
 )
 
 func ExampleVector3() {

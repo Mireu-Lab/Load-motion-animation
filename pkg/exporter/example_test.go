@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"gitlab.com/mireu-lab/Load-motion-animation/pkg/exporter"
-	"gitlab.com/mireu-lab/Load-motion-animation/pkg/motion"
+	"github.com/Mireu-Lab/Load-motion-animation/pkg/exporter"
+	"github.com/Mireu-Lab/Load-motion-animation/pkg/motion"
 )
 
 func ExampleExportCSVWriter() {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"gitlab.com/mireu-lab/Load-motion-animation/pkg/trc"
+	"github.com/Mireu-Lab/Load-motion-animation/pkg/trc"
 )
 
 func ExampleParser_ParseReader() {

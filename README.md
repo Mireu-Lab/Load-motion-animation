@@ -1,13 +1,19 @@
 # Load-Motion-Animation 🎬
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/Mireu-Lab/Load-motion-animation.svg)](https://pkg.go.dev/github.com/Mireu-Lab/Load-motion-animation)
+[![License: LGPL v3](https://img.shields.io/badge/License-LGPL_v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
+[![GitHub Wiki](https://img.shields.io/badge/docs-GitHub_Wiki-brightgreen.svg)](https://github.com/Mireu-Lab/Load-motion-animation/wiki)
+[![Go CI](https://github.com/Mireu-Lab/Load-motion-animation/actions/workflows/ci.yml/badge.svg)](https://github.com/Mireu-Lab/Load-motion-animation/actions)
+
+
 <p align="center">
   <strong>High-Performance 3D/2D Motion Capture Parser, Batch Preprocessing & Pipeline Engine</strong><br>
   <em>Built for AI/ML Motion Synthesis, Text-to-Motion Research, Biomechanics, and Data Pipelines</em>
 </p>
 
 <p align="center">
-  <a href="https://gitlab.com/mireu-lab/Load-motion-animation/-/pipelines"><img src="https://gitlab.com/mireu-lab/Load-motion-animation/badges/main/pipeline.svg" alt="GitLab CI Pipeline"></a>
-  <a href="https://pkg.go.dev/gitlab.com/mireu-lab/Load-motion-animation"><img src="https://pkg.go.dev/badge/gitlab.com/mireu-lab/Load-motion-animation.svg" alt="Go Reference"></a>
+  <a href="https://github.com/Mireu-Lab/Load-motion-animation/-/pipelines"><img src="https://github.com/Mireu-Lab/Load-motion-animation/badges/main/pipeline.svg" alt="GitLab CI Pipeline"></a>
+  <a href="https://pkg.go.dev/github.com/Mireu-Lab/Load-motion-animation"><img src="https://pkg.go.dev/badge/github.com/Mireu-Lab/Load-motion-animation.svg" alt="Go Reference"></a>
   <a href="https://golang.org"><img src="https://img.shields.io/badge/Go-1.22+-00ADD8?style=flat&logo=go&logoColor=white" alt="Go Version"></a>
   <a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.8+-3776AB?style=flat&logo=python&logoColor=white" alt="Python Version"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
@@ -93,10 +99,10 @@ flowchart LR
 ### 🐹 Golang Package & CLI
 ```bash
 # As a Go module dependency in your project
-go get gitlab.com/mireu-lab/Load-motion-animation@v0.1.0
+go get github.com/Mireu-Lab/Load-motion-animation@v0.1.0
 
 # Clone and build the high-speed CLI binary
-git clone https://gitlab.com/mireu-lab/Load-motion-animation.git
+git clone https://github.com/Mireu-Lab/Load-motion-animation.git
 cd Load-motion-animation
 make build
 # Binary is ready at bin/motion-parser
@@ -105,7 +111,7 @@ make build
 ### 🐍 Python Package
 ```bash
 # Install directly from repository
-pip install git+https://gitlab.com/mireu-lab/Load-motion-animation.git#subdirectory=python
+pip install git+https://github.com/Mireu-Lab/Load-motion-animation.git#subdirectory=python
 
 # Or local editable development
 cd python
@@ -188,9 +194,9 @@ import (
 	"path/filepath"
 	"sync"
 
-	"gitlab.com/mireu-lab/Load-motion-animation/pkg/bvh"
-	"gitlab.com/mireu-lab/Load-motion-animation/pkg/df"
-	"gitlab.com/mireu-lab/Load-motion-animation/pkg/motion"
+	"github.com/Mireu-Lab/Load-motion-animation/pkg/bvh"
+	"github.com/Mireu-Lab/Load-motion-animation/pkg/df"
+	"github.com/Mireu-Lab/Load-motion-animation/pkg/motion"
 )
 
 func processFile(parser motion.Parser, path string, wg *sync.WaitGroup, results chan<- string) {
@@ -284,11 +290,11 @@ make test
 
 ## 📖 8. Documentation & API Reference
 
-- **pkg.go.dev Official API Docs**: [https://pkg.go.dev/gitlab.com/mireu-lab/Load-motion-animation](https://pkg.go.dev/gitlab.com/mireu-lab/Load-motion-animation)
+- **pkg.go.dev Official API Docs**: [https://pkg.go.dev/github.com/Mireu-Lab/Load-motion-animation](https://pkg.go.dev/github.com/Mireu-Lab/Load-motion-animation)
 - **Local Interactive Godoc Server**:
   ```bash
   make godoc
-  # Opens at: http://localhost:6060/pkg/gitlab.com/mireu-lab/Load-motion-animation/
+  # Opens at: http://localhost:6060/pkg/github.com/Mireu-Lab/Load-motion-animation/
   ```
 - **GitLab Pages Static Site**:
   ```bash
@@ -311,7 +317,7 @@ The repository includes an enterprise-grade GitLab CI/CD pipeline covering the e
 ## 🤝 10. Contributing
 
 Contributions, bug reports, and feature proposals are welcome!
-1. Fork the repository (`git clone https://gitlab.com/mireu-lab/Load-motion-animation.git`).
+1. Fork the repository (`git clone https://github.com/Mireu-Lab/Load-motion-animation.git`).
 2. Create your feature branch (`git checkout -b feature/awesome-feature`).
 3. Commit your changes (`git commit -m 'feat: add awesome feature'`).
 4. Push to the branch (`git push origin feature/awesome-feature`).
@@ -321,4 +327,4 @@ Contributions, bug reports, and feature proposals are welcome!
 
 ## 📄 11. License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **GNU Lesser General Public License v3.0 (LGPL-3.0)** - see the [LICENSE](LICENSE) file for details.

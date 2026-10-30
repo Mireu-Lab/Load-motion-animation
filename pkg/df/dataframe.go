@@ -6,7 +6,7 @@ package df
 import (
 	"fmt"
 
-	"gitlab.com/mireu-lab/Load-motion-animation/pkg/motion"
+	"github.com/Mireu-Lab/Load-motion-animation/pkg/motion"
 )
 
 // Row represents a single flattened tabular record representing a joint's 3D state in a frame.

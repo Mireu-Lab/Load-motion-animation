@@ -3,7 +3,7 @@ package visualizer_test
 import (
 	"fmt"
 
-	"gitlab.com/mireu-lab/Load-motion-animation/pkg/visualizer"
+	"github.com/Mireu-Lab/Load-motion-animation/pkg/visualizer"
 )
 
 func ExampleDefaultGIFOptions() {

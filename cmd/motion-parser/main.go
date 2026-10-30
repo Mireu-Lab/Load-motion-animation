@@ -22,13 +22,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gitlab.com/mireu-lab/Load-motion-animation/pkg/bvh"
-	"gitlab.com/mireu-lab/Load-motion-animation/pkg/c3d"
-	"gitlab.com/mireu-lab/Load-motion-animation/pkg/df"
-	"gitlab.com/mireu-lab/Load-motion-animation/pkg/exporter"
-	"gitlab.com/mireu-lab/Load-motion-animation/pkg/motion"
-	"gitlab.com/mireu-lab/Load-motion-animation/pkg/trc"
-	"gitlab.com/mireu-lab/Load-motion-animation/pkg/visualizer"
+	"github.com/Mireu-Lab/Load-motion-animation/pkg/bvh"
+	"github.com/Mireu-Lab/Load-motion-animation/pkg/c3d"
+	"github.com/Mireu-Lab/Load-motion-animation/pkg/df"
+	"github.com/Mireu-Lab/Load-motion-animation/pkg/exporter"
+	"github.com/Mireu-Lab/Load-motion-animation/pkg/motion"
+	"github.com/Mireu-Lab/Load-motion-animation/pkg/trc"
+	"github.com/Mireu-Lab/Load-motion-animation/pkg/visualizer"
 )
 
 func main() {

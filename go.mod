@@ -1,3 +1,3 @@
-module gitlab.com/mireu-lab/Load-motion-animation
+module github.com/Mireu-Lab/Load-motion-animation
 
 go 1.22

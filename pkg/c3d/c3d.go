@@ -15,7 +15,7 @@ import (
 	"os"
 	"strings"
 
-	"gitlab.com/mireu-lab/Load-motion-animation/pkg/motion"
+	"github.com/Mireu-Lab/Load-motion-animation/pkg/motion"
 )
 
 // Parser parses binary C3D motion capture files.

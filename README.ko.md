@@ -6,8 +6,8 @@
 </p>
 
 <p align="center">
-  <a href="https://gitlab.com/mireu-lab/Load-motion-animation/-/pipelines"><img src="https://gitlab.com/mireu-lab/Load-motion-animation/badges/main/pipeline.svg" alt="GitLab CI Pipeline"></a>
-  <a href="https://pkg.go.dev/gitlab.com/mireu-lab/Load-motion-animation"><img src="https://pkg.go.dev/badge/gitlab.com/mireu-lab/Load-motion-animation.svg" alt="Go Reference"></a>
+  <a href="https://github.com/Mireu-Lab/Load-motion-animation/-/pipelines"><img src="https://github.com/Mireu-Lab/Load-motion-animation/badges/main/pipeline.svg" alt="GitLab CI Pipeline"></a>
+  <a href="https://pkg.go.dev/github.com/Mireu-Lab/Load-motion-animation"><img src="https://pkg.go.dev/badge/github.com/Mireu-Lab/Load-motion-animation.svg" alt="Go Reference"></a>
   <a href="https://golang.org"><img src="https://img.shields.io/badge/Go-1.22+-00ADD8?style=flat&logo=go&logoColor=white" alt="Go Version"></a>
   <a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.8+-3776AB?style=flat&logo=python&logoColor=white" alt="Python Version"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
@@ -93,10 +93,10 @@ flowchart LR
 ### 🐹 Golang 패키지 및 CLI
 ```bash
 # Go 프로젝트의 모듈 종속성으로 추가
-go get gitlab.com/mireu-lab/Load-motion-animation@v0.1.0
+go get github.com/Mireu-Lab/Load-motion-animation@v0.1.0
 
 # CLI 바이너리 직접 빌드
-git clone https://gitlab.com/mireu-lab/Load-motion-animation.git
+git clone https://github.com/Mireu-Lab/Load-motion-animation.git
 cd Load-motion-animation
 make build
 # bin/motion-parser 바이너리가 생성됩니다.
@@ -105,7 +105,7 @@ make build
 ### 🐍 Python 패키지
 ```bash
 # GitLab 저장소에서 직접 pip 설치
-pip install git+https://gitlab.com/mireu-lab/Load-motion-animation.git#subdirectory=python
+pip install git+https://github.com/Mireu-Lab/Load-motion-animation.git#subdirectory=python
 
 # 또는 로컬 개발 모드 설치
 cd python
@@ -188,9 +188,9 @@ import (
 	"path/filepath"
 	"sync"
 
-	"gitlab.com/mireu-lab/Load-motion-animation/pkg/bvh"
-	"gitlab.com/mireu-lab/Load-motion-animation/pkg/df"
-	"gitlab.com/mireu-lab/Load-motion-animation/pkg/motion"
+	"github.com/Mireu-Lab/Load-motion-animation/pkg/bvh"
+	"github.com/Mireu-Lab/Load-motion-animation/pkg/df"
+	"github.com/Mireu-Lab/Load-motion-animation/pkg/motion"
 )
 
 func processFile(parser motion.Parser, path string, wg *sync.WaitGroup, results chan<- string) {
@@ -282,11 +282,11 @@ make test
 
 ## 📖 8. 문서화 및 API 레퍼런스
 
-- **pkg.go.dev 공식 문서**: [https://pkg.go.dev/gitlab.com/mireu-lab/Load-motion-animation](https://pkg.go.dev/gitlab.com/mireu-lab/Load-motion-animation)
+- **pkg.go.dev 공식 문서**: [https://pkg.go.dev/github.com/Mireu-Lab/Load-motion-animation](https://pkg.go.dev/github.com/Mireu-Lab/Load-motion-animation)
 - **로컬 대화형 Godoc 서버**:
   ```bash
   make godoc
-  # 브라우저 접속: http://localhost:6060/pkg/gitlab.com/mireu-lab/Load-motion-animation/
+  # 브라우저 접속: http://localhost:6060/pkg/github.com/Mireu-Lab/Load-motion-animation/
   ```
 - **GitLab Pages 정적 사이트 빌드**:
   ```bash
