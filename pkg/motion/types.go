@@ -117,4 +117,3 @@ type StreamParser interface {
 	StreamReader(r io.Reader, filename string, callback FrameCallback) (*MotionData, error)
 	StreamFile(filePath string, callback FrameCallback) (*MotionData, error)
 }
-

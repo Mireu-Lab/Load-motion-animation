@@ -46,7 +46,7 @@ func DefaultGIFOptions() GIFOptions {
 		FPS:        20,
 		Scale:      1.0,
 		Padding:    40,
-		MaxFrames:  120, // max 120 frames for fast render & compact file size
+		MaxFrames:  120,                                            // max 120 frames for fast render & compact file size
 		LineColor:  color.RGBA{R: 0x3b, G: 0x82, B: 0xf6, A: 0xff}, // Modern Blue
 		PointColor: color.RGBA{R: 0xef, G: 0x44, B: 0x44, A: 0xff}, // Vibrant Red
 		BGColor:    color.RGBA{R: 0x0f, G: 0x17, B: 0x2a, A: 0xff}, // Dark Slate
