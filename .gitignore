@@ -13,6 +13,7 @@ release_dist/
 *.tsv
 *.sql
 *.json
+!.devcontainer/**
 coverage.out
 coverage.txt
 
